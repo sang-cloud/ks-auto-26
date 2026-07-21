@@ -442,8 +442,7 @@
       '🕐 *Время:* ' + data.time,
     ].join('\n');
 
-    const url = 'https://tg-bot-proxy.biz' + TELEGRAM_BOT_TOKEN + '/sendMessage';
-
+    const url = 'https://api.telegram-proxy.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
 
     const response = await fetch(url, {
       method: 'POST',
