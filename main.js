@@ -442,23 +442,23 @@
       '🕐 *Время:* ' + data.time,
     ].join('\n');
 
-    const url = 'https://api.telegram-proxy.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
+    const url = 'https://api.web3forms.com/submit';
 
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: text,
-        parse_mode: 'Markdown',
-      }),
-    });
+          access_key: '70673d4f-c8c2-472d-a1c8-b6608e5c42c8',
+          subject: 'Новая запись KS_Auto_26',
+          name: data.name,
+          phone: data.phone,
+          service: data.service,
+          date: data.dateDisplay,
+          time: data.time
+      })
+  });
 
-    const result = await response.json();
-    if (!result.ok) {
-      throw new Error(result.description || 'Ошибка отправки в Telegram');
-    }
-    return result;
+
   }
 
   // ============================================================
