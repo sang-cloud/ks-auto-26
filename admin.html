@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Заявки — КС Авто 26</title>
+  <link rel="stylesheet" href="admin.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/admin.js" defer></script>
+</head>
+<body>
+  <main>
+    <a href="index.html">На сайт</a>
+    <h1>Заявки</h1>
+    <p id="feedback" role="status"></p>
+    <form id="login">
+      <h2>Вход владельца</h2>
+      <label>Почта<input name="email" type="email" autocomplete="username" required></label>
+      <label>Пароль<input name="password" type="password" autocomplete="current-password" required></label>
+      <button>Войти</button>
+    </form>
+    <section id="cabinet" aria-label="Кабинет владельца" hidden>
+      <div class="actions">
+        <button id="refresh">Обновить</button>
+        <button id="logout">Выйти</button>
+      </div>
+      <p id="new-count"></p>
+      <ul id="bookings"></ul>
+      <div class="actions">
+        <button id="previous" disabled>Назад</button>
+        <button id="next" disabled>Далее</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
