@@ -5,13 +5,6 @@
   // НАСТРОЙКИ — заполните своими данными
   // ============================================================
 
-  // Токен вашего Telegram-бота (получите у @BotFather)
-  const TELEGRAM_BOT_TOKEN = '8677587478:AAEqxVB_yJ4q7TbkJRUbFwaSh3tNBYu9eXA';
-
-  // ID чата, куда приходят заявки (ваш user ID или ID группы)
-  // Узнать свой ID: напишите боту @userinfobot или @getmyid_bot
-  const TELEGRAM_CHAT_ID = '5796762111';
-
   // Номер телефона автосервиса (отображается на сайте и в tel: ссылках)
   const PHONE_DISPLAY = '+7 (938) 029-40-09';
   const PHONE_TEL = '+79380294009';
@@ -251,10 +244,6 @@
     return y + '-' + m + '-' + d;
   }
 
-  function formatDateDisplay(date) {
-    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
-
   function canGoPrevMonth() {
     const today = new Date();
     return calYear > today.getFullYear() ||
@@ -425,40 +414,22 @@
   }
 
   // ============================================================
-  // Telegram notification
+  // Booking storage
   // ============================================================
-  async function sendToTelegram(data) {
-    if (TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE' || TELEGRAM_CHAT_ID === 'YOUR_CHAT_ID_HERE') {
-      throw new Error('Заполните TELEGRAM_BOT_TOKEN и TELEGRAM_CHAT_ID в js/main.js');
+  async function saveBooking(data) {
+    const config = window.KSAutoConfig;
+    if (!config?.url || !config.publishableKey) {
+      throw new Error('Онлайн-запись пока недоступна. Пожалуйста, позвоните нам.');
     }
 
-    const text = [
-      '🚗 *Новая заявка KS_Auto_26*',
-      '',
-      '👤 *Имя:* ' + data.name,
-      '📞 *Телефон:* ' + data.phone,
-      '🔧 *Услуга:* ' + data.service,
-      '📅 *Дата:* ' + data.dateDisplay,
-      '🕐 *Время:* ' + data.time,
-    ].join('\n');
-
-    const url = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
-
-    const response = await fetch(url, {
+    const response = await fetch(config.url.replace(/\/$/, '') + '/rest/v1/rpc/submit_booking', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: text,
-        parse_mode: 'Markdown',
-      }),
+      headers: { apikey: config.publishableKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
     });
-
-    const result = await response.json();
-    if (!result.ok) {
-      throw new Error(result.description || 'Ошибка отправки в Telegram');
+    if (!response.ok) {
+      throw new Error('Не удалось отправить заявку. Попробуйте ещё раз или позвоните нам.');
     }
-    return result;
   }
 
   // ============================================================
@@ -519,16 +490,16 @@
     submitBtn.textContent = 'Отправка...';
 
     const formData = {
-      name: nameInput.value.trim(),
-      phone: phoneInput.value,
-      service: serviceSelect.value,
-      date: selectedDateInput.value,
-      dateDisplay: formatDateDisplay(selectedDate),
-      time: selectedTime,
+      customer_name: nameInput.value.trim(),
+      customer_phone: phoneInput.value,
+      requested_service: serviceSelect.value,
+      requested_date: selectedDateInput.value,
+      requested_time: selectedTime,
+      consent_given: consentInput.checked,
     };
 
     try {
-      await sendToTelegram(formData);
+      await saveBooking(formData);
       showToast('Заявка отправлена! Мы свяжемся с вами для подтверждения.');
       bookingForm.reset();
       selectedDate = null;
@@ -539,7 +510,7 @@
       renderTimeSlots();
     } catch (err) {
       console.error(err);
-      showToast(err.message || 'Не удалось отправить заявку. Попробуйте позвонить нам.', true);
+      showToast(err instanceof TypeError ? 'Не удалось связаться с сайтом. Попробуйте ещё раз или позвоните нам.' : err.message, true);
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Отправить заявку';
